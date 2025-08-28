@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servo Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+        }
+        
+        .section h2 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .connection-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        select, input {
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status {
+            text-align: center;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+        
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .servo-control {
+            margin-bottom: 25px;
+        }
+        
+        .servo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .servo-header h3 {
+            color: #495057;
+            font-size: 16px;
+        }
+        
+        .angle-display {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .slider {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #dee2e6;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .angle-input {
+            width: 70px;
+            text-align: center;
+        }
+        
+        .current-values {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #495057;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .connection-controls {
+                flex-direction: column;
+            }
+            
+            select, input, button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Servo Control Panel</h1>
+        
+        <div class="section">
+            <h2>Serial Connection</h2>
+            <div class="connection-controls">
+                <select id="portSelect">
+                    <option value="">Select Port</option>
+                </select>
+                <select id="baudSelect">
+                    <option value="9600">9600</option>
+                    <option value="19200">19200</option>
+                    <option value="38400">38400</option>
+                    <option value="57600">57600</option>
+                    <option value="115200">115200</option>
+                </select>
+                <button id="connectBtn">Connect</button>
+            </div>
+            <div id="status" class="status disconnected">Disconnected</div>
+            <div class="warning">
+                ⚠️ Web Serial API requires Chrome/Edge browser and HTTPS
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Servo Controls</h2>
+            
+            <div class="servo-control">
+                <div class="servo-header">
+                    <h3>Servo 1</h3>
+                    <div class="angle-display" id="servo1Display">90°</div>
+                </div>
+                <div class="slider-container">
+                    <span>0°</span>
+                    <input type="range" id="servo1Slider" class="slider" min="0" max="180" value="90">
+                    <span>180°</span>
+                    <input type="number" id="servo1Input" class="angle-input" min="0" max="180" value="90">
+                </div>
+            </div>
+            
+            <div class="servo-control">
+                <div class="servo-header">
+                    <h3>Servo 2</h3>
+                    <div class="angle-display" id="servo2Display">90°</div>
+                </div>
+                <div class="slider-container">
+                    <span>0°</span>
+                    <input type="range" id="servo2Slider" class="slider" min="0" max="180" value="90">
+                    <span>180°</span>
+                    <input type="number" id="servo2Input" class="angle-input" min="0" max="180" value="90">
+                </div>
+            </div>
+            
+            <button id="sendBtn" disabled>Send Angles</button>
+            
+            <div class="current-values" id="currentValues">
+                Servo 1: 90° | Servo 2: 90°
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class ServoController {
+            constructor() {
+                this.port = null;
+                this.connected = false;
+                this.servo1Angle = 90;
+                this.servo2Angle = 90;
+                
+                this.initElements();
+                this.setupEventListeners();
+                this.checkWebSerialSupport();
+            }
+            
+            initElements() {
+                this.connectBtn = document.getElementById('connectBtn');
+                this.statusDiv = document.getElementById('status');
+                this.sendBtn = document.getElementById('sendBtn');
+                
+                this.servo1Slider = document.getElementById('servo1Slider');
+                this.servo1Input = document.getElementById('servo1Input');
+                this.servo1Display = document.getElementById('servo1Display');
+                
+                this.servo2Slider = document.getElementById('servo2Slider');
+                this.servo2Input = document.getElementById('servo2Input');
+                this.servo2Display = document.getElementById('servo2Display');
+                
+                this.currentValues = document.getElementById('currentValues');
+            }
+            
+            setupEventListeners() {
+                this.connectBtn.addEventListener('click', () => this.toggleConnection());
+                this.sendBtn.addEventListener('click', () => this.sendAngles());
+                
+                // Servo 1 controls
+                this.servo1Slider.addEventListener('input', () => this.updateServo1());
+                this.servo1Input.addEventListener('input', () => this.updateServo1FromInput());
+                
+                // Servo 2 controls
+                this.servo2Slider.addEventListener('input', () => this.updateServo2());
+                this.servo2Input.addEventListener('input', () => this.updateServo2FromInput());
+            }
+            
+            checkWebSerialSupport() {
+                if (!('serial' in navigator)) {
+                    alert('Web Serial API not supported. Please use Chrome or Edge browser with HTTPS.');
+                }
+            }
+            
+            async toggleConnection() {
+                if (!this.connected) {
+                    await this.connect();
+                } else {
+                    this.disconnect();
+                }
+            }
+            
+            async connect() {
+                try {
+                    // Request port access
+                    this.port = await navigator.serial.requestPort();
+                    await this.port.open({ baudRate: 9600 });
+                    
+                    this.connected = true;
+                    this.connectBtn.textContent = 'Disconnect';
+                    this.statusDiv.textContent = 'Connected';
+                    this.statusDiv.className = 'status connected';
+                    this.sendBtn.disabled = false;
+                    
+                    console.log('✓ Connected to serial port');
+                    this.sendAngles(); // Send initial position
+                    
+                } catch (error) {
+                    console.error('Connection failed:', error);
+                    alert(`Connection failed: ${error.message}`);
+                }
+            }
+            
+            disconnect() {
+                if (this.port) {
+                    this.port.close();
+                    this.port = null;
+                }
+                
+                this.connected = false;
+                this.connectBtn.textContent = 'Connect';
+                this.statusDiv.textContent = 'Disconnected';
+                this.statusDiv.className = 'status disconnected';
+                this.sendBtn.disabled = true;
+                
+                console.log('✓ Disconnected');
+            }
+            
+            updateServo1() {
+                this.servo1Angle = parseInt(this.servo1Slider.value);
+                this.servo1Input.value = this.servo1Angle;
+                this.servo1Display.textContent = `${this.servo1Angle}°`;
+                this.updateCurrentValues();
+                
+                // if (this.connected) {
+                //     this.sendAngles();
+                //}
+            }
+            
+            updateServo1FromInput() {
+                const value = parseInt(this.servo1Input.value);
+                if (value >= 0 && value <= 180) {
+                    this.servo1Angle = value;
+                    this.servo1Slider.value = value;
+                    this.servo1Display.textContent = `${value}°`;
+                    this.updateCurrentValues();
+                    
+                    // if (this.connected) {
+                    //     this.sendAngles();
+                    // }
+                }
+            }
+            
+            updateServo2() {
+                this.servo2Angle = parseInt(this.servo2Slider.value);
+                this.servo2Input.value = this.servo2Angle;
+                this.servo2Display.textContent = `${this.servo2Angle}°`;
+                this.updateCurrentValues();
+                
+                // if (this.connected) {
+                //     this.sendAngles();
+                // }
+            }
+            
+            updateServo2FromInput() {
+                const value = parseInt(this.servo2Input.value);
+                if (value >= 0 && value <= 180) {
+                    this.servo2Angle = value;
+                    this.servo2Slider.value = value;
+                    this.servo2Display.textContent = `${value}°`;
+                    this.updateCurrentValues();
+                    
+                    // if (this.connected) {
+                    //     this.sendAngles();
+                    // }
+                }
+            }
+            
+            updateCurrentValues() {
+                this.currentValues.textContent = `Servo 1: ${this.servo1Angle}° | Servo 2: ${this.servo2Angle}°`;
+            }
+            
+            async sendAngles() {
+                if (!this.connected || !this.port) return;
+                
+                try {
+                    const command = `S1 ${this.servo1Angle},S2 ${this.servo2Angle}\n`; // S1 90, S2 90
+                    //const command = `S2 ${this.servo2Angle}\n`;
+                    const encoder = new TextEncoder();
+                    const writer = this.port.writable.getWriter();
+                    
+                    await writer.write(encoder.encode(command));
+                    writer.releaseLock();
+                    
+                    console.log(`→ Sent: ${command.trim()}`);
+                    
+                } catch (error) {
+                    console.error('Send error:', error);
+                    alert(`Failed to send data: ${error.message}`);
+                }
+            }
+        }
+        
+        // Initialize the controller when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new ServoController();
+        });
+    </script>
+</body>
+</html>
