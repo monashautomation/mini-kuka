@@ -380,9 +380,9 @@
                 this.servo1Display.textContent = `${this.servo1Angle}°`;
                 this.updateCurrentValues();
                 
-                // if (this.connected) {
-                //     this.sendAngles();
-                //}
+                if (this.connected) {
+                     this.sendAngles();
+                }
             }
             
             updateServo1FromInput() {
@@ -393,9 +393,9 @@
                     this.servo1Display.textContent = `${value}°`;
                     this.updateCurrentValues();
                     
-                    // if (this.connected) {
-                    //     this.sendAngles();
-                    // }
+                    if (this.connected) {
+                         this.sendAngles();
+                    }
                 }
             }
             
@@ -405,9 +405,9 @@
                 this.servo2Display.textContent = `${this.servo2Angle}°`;
                 this.updateCurrentValues();
                 
-                // if (this.connected) {
-                //     this.sendAngles();
-                // }
+                if (this.connected) {
+                     this.sendAngles();
+                 }
             }
             
             updateServo2FromInput() {
@@ -418,9 +418,9 @@
                     this.servo2Display.textContent = `${value}°`;
                     this.updateCurrentValues();
                     
-                    // if (this.connected) {
-                    //     this.sendAngles();
-                    // }
+                    if (this.connected) {
+                         this.sendAngles();
+                    }
                 }
             }
             

@@ -11,7 +11,7 @@ class Servo_MA:
         :param max_us: Maximum pulse width in microseconds
         :param freq: PWM frequency in Hz
         """
-    
+        print("CHECKING SERVO INIT")
         self.pwm = PWM(Pin(pwm_pin))
         self.pwm.freq(freq)
         self.min_us = min_us
@@ -36,8 +36,20 @@ class Servo_MA:
         duty = int((pulse_us / period_us) * 65535) 
         print(f"Setting angle to {angle}°, pulse width: {pulse_us}us, duty: {duty}")
         self.lp_angle = self.lp_angle * 0.9 + angle * 0.1 if self.lp_angle is not None else angle
-        self.curent_angle = angle
+        self.current_angle = angle
         self.pwm.duty_u16(duty)
+    
+    def set_angle_smooth(self, angle,smoothing_factor=0.05):
+        """
+        Smoothly move the servo to the specified angle.
+        """
+        if self.current_angle is not None:
+            if abs(self.current_angle - angle) > 1:
+                temp_angle = self.current_angle*(1-smoothing_factor) + angle*smoothing_factor
+                self.set_angle(temp_angle)
+                print(f"Smooth moving to {angle}°, current angle: {self.current_angle}°")
+            return
+        
 
 
     def get_angle(self):
