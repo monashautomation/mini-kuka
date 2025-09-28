@@ -2,7 +2,7 @@ from machine import Pin, PWM
 import time
 from lib.robot_arm_class import Servo_MA
 
-servo1 = Servo_MA(pwm_pin=16, min_us=500, max_us=2500, freq=50)
+servo1 = Servo_MA(pwm_pin=17, min_us=500, max_us=2500, freq=50)
 # Setup
 led = Pin("LED", Pin.OUT)
 time.sleep(1)
@@ -11,16 +11,18 @@ time.sleep(1)
 
 # Example movement
 while True:
-    for angle in range(0, 181, 10):  # 0° to 180°
+    for angle in range(0, 181, 1):  # 0° to 180°
         servo1.set_angle(angle)
+        #servo1.set_angle_smooth(angle)
         print(f"Moving to {angle}°")
         print(servo1.pwm)
-        time.sleep(0.1)
+        time.sleep(3)
         led.toggle()
-    for angle in range(180, -1, -10):  # 180° back to 0°
+    for angle in range(180, -1, -1):  # 180° back to 0°
         led.toggle()
         print(f"Moving to {angle}°")
         servo1.set_angle(angle)
+        #servo1.set_angle_smooth(angle)
         time.sleep(0.1)
 
 # for i in range(1000,9000,100):

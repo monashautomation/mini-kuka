@@ -2,7 +2,7 @@ from machine import Pin, PWM
 import time
 
 # Setup
-servo = PWM(Pin(16))   # Use GPIO16 (change if needed)
+servo = PWM(Pin(18))   # Use GPIO16 (change if needed)
 servo.freq(50)         # Standard servo PWM frequency: 50 Hz
 led = Pin("LED", Pin.OUT)
 
@@ -17,13 +17,13 @@ def set_angle(angle):
 
 # Example movement
 while True:
-    for angle in range(0, 181, 10):  # 0° to 180°
+    for angle in range(0, 181, 1):  # 0° to 180°
         set_angle(angle)
         print(f"Moving to {angle}°")
         print(servo)
         time.sleep(0.05)
         led.toggle()
-    for angle in range(180, -1, -10):  # 180° back to 0°
+    for angle in range(180, -1, -1):  # 180° back to 0°
         led.toggle()
         print(f"Moving to {angle}°")
         set_angle(angle)
