@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KUKA Arm Control Station</title>
+    <style>
+        body {
+            font-family: 'Roboto Mono', 'Courier New', monospace;
+            background: #fff;
+            margin: 0;
+            padding: 0;
+            color: #222;
+            overflow-x: hidden;
+        }
+        .header-bar {
+            background: #2a75f8;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 2px solid #2a75f8;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .header-bar h1 {
+            margin: 0;
+            color: #2a75f8;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        .status-indicator {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: pulse 2s infinite;
+        }
+        .status-dot.connected {
+            background: #28a745;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            height: calc(100vh - 60px);
+            gap: 0;
+        }
+        .left-panel {
+            background: #2b2f36;
+            padding: 20px;
+            border-right: 1px solid #3d4146;
+            overflow-y: auto;
+        }
+        .right-panel {
+            background: #1a1d23;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .section-title {
+            color: #2a75f8;
+            font-size: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #3d4146;
+        }
+        .robot-display {
+            background: #3d4146;
+            border: 1px solid #4a4e55;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .robot-display img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            border: 1px solid #555;
+        }
+        .joint-overlay {
+            position: relative;
+            display: inline-block;
+        }
+        .joint-marker {
+            position: absolute;
+            background: #2a75f8;
+            color: #1a1d23;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid #0148c4;
+            transition: all 0.2s;
+        }
+        .joint-marker:hover {
+            background: #0148c4;
+            transform: scale(1.1);
+        }
+        .connection-panel {
+            background: #3d4146;
+            border: 1px solid #4a4e55;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .connection-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        select, input[type="number"] {
+            background: #2b2f36;
+            border: 1px solid #555;
+            color: #e1e5e9;
+            padding: 8px;
+            border-radius: 2px;
+            font-family: inherit;
+            font-size: 13px;
+        }
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #2a75f8;
+            box-shadow: 0 0 3px rgba(255, 107, 53, 0.3);
+        }
+        .btn {
+            background: #2a75f8;
+            color: #1a1d23;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 2px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #0148c4;
+        }
+        .btn:disabled {
+            background: #555;
+            color: #888;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #4a4e55;
+            color: #e1e5e9;
+        }
+        .btn-secondary:hover {
+            background: #565c64;
+        }
+        .status-text {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 2px;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+        .status-disconnected {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #dc3545;
+        }
+        .status-connected {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #28a745;
+        }
+        .servo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        .servo-card {
+            background: #2b2f36;
+            border: 1px solid #3d4146;
+            border-radius: 4px;
+            padding: 15px;
+            transition: border-color 0.2s;
+        }
+        .servo-card:hover {
+            border-color: #2a75f8;
+        }
+        .servo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .servo-label {
+            color: #2a75f8;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .servo-value {
+            background: #3d4146;
+            color: #e1e5e9;
+            padding: 4px 8px;
+            border-radius: 2px;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid #4a4e55;
+        }
+        .servo-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .servo-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 4px;
+            background: #3d4146;
+            outline: none;
+            border-radius: 2px;
+        }
+        .servo-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #2a75f8;
+            border-radius: 2px;
+            cursor: pointer;
+            border: 1px solid #0148c4;
+        }
+        .servo-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #2a75f8;
+            border-radius: 2px;
+            cursor: pointer;
+            border: 1px solid #0148c4;
+        }
+        .servo-input {
+            width: 60px;
+        }
+        .degree-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 11px;
+            color: #888;
+        }
+        .control-panel {
+            background: #2b2f36;
+            border: 1px solid #3d4146;
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .current-state {
+            background: #3d4146;
+            border: 1px solid #4a4e55;
+            border-radius: 2px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .warning-text {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+            padding: 8px;
+            border-radius: 2px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            .servo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Bar -->
+    <div class="header-bar">
+        <h1>KUKA ARM CONTROL STATION</h1>
+        <div class="status-indicator">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">DISCONNECTED</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel - Robot Display -->
+        <div class="left-panel">
+            <div class="section-title">Robot Visualization</div>
+            <div class="robot-display">
+                <div class="joint-overlay">
+                    <img id="robotImg" src="kuka_arm.png" alt="KUKA Arm" style="max-width: 300px;">
+
+                    <!-- Joint markers, now mapped to correct servo input panels -->
+                    <div class="joint-marker" style="top: 83%; left: 10%;" onclick="focusServoInput(1)">Base</div>
+                    <div class="joint-marker" style="top: 60%; left: 27%;" onclick="focusServoInput(2)">Joint 1</div>
+                    <div class="joint-marker" style="top: 15%; left: 7%;" onclick="focusServoInput(3)">Joint 2</div>
+                    <div class="joint-marker" style="top: 15%; left: 70%;" onclick="focusServoInput(4)">Joint 3</div>
+                    <div class="joint-marker" style="top: 55%; left: 75%;" onclick="focusServoInput(5)">Gripper</div>
+                </div>
+            </div>
+
+            <!-- Connection Panel -->
+            <div class="section-title">Serial Connection</div>
+            <div class="connection-panel">
+                <div class="connection-row">
+                    <select id="portSelect" style="flex: 1;">
+                        <option value="">Select COM Port</option>
+                    </select>
+                    <select id="baudSelect" style="width: 100px;">
+                        <option value="9600">9600</option>
+                        <option value="19200">19200</option>
+                        <option value="38400">38400</option>
+                        <option value="57600">57600</option>
+                        <option value="115200">115200</option>
+                    </select>
+                </div>
+                <button id="connectBtn" class="btn" style="width: 100%;">CONNECT</button>
+                <div id="status" class="status-text status-disconnected">SYSTEM DISCONNECTED</div>
+                <div class="warning-text">
+                    ⚠ Requires Chrome/Edge browser with Web Serial API support
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Servo Controls -->
+        <div class="right-panel">
+            <div class="section-title">Joint Control Matrix</div>
+            <div class="servo-grid" id="servoGrid">
+                <!-- Servo cards will be dynamically generated here -->
+            </div>
+
+            <div class="control-panel">
+                <button id="sendBtn" class="btn" disabled style="width: 100%; margin-bottom: 15px;">EXECUTE POSITION</button>
+                <button class="btn-secondary btn" onclick="resetAllServos()" style="width: 100%;">RESET KUKA ARM</button>
+                
+                <div class="section-title" style="margin-top: 20px; margin-bottom: 10px;">System State</div>
+                <div class="current-state" id="currentState">
+                    // System Status: Standby
+                    // Joint Positions: [90°, 90°, 90°, 90°, 90°]
+                    // Last Command: None
+                    // Connection: Offline
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="kuka_control.js"></script>
+</body>
+</html>
