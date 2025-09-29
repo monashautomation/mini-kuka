@@ -10,44 +10,103 @@
             background: #23a8ff;
             margin: 0;
             padding: 0;
-            color: #222;
+            color: #050a58; 
             overflow-x: hidden;
         }
         .header-bar {
-            background: #fff;
-            height: 70px;
+            background: #0b138b;
+            width: 100vw;
+            min-width: 100vw;
+            height: 56px;
             display: flex;
             align-items: center;
-            padding: 0 30px;
+            justify-content: flex-start;
+            padding: 0 20px 0 20px;
+            gap: 18px;
+            position: relative;
+        .status-indicator {
+    color: #fff;
+    color: #fff !important;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #dc3545;
+            margin-right: 4px;
+            animation: pulse 2s infinite;
+        }
+        .status-dot.connected {
+            background: #28a745;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
             border-bottom: 2px solid #fff;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
         .header-bar h1 {
             margin: 0;
-            color: #222;
-            font-size: 32px;
-            font-weight: 700;
+            color: #fff;
+            font-size: 36px;
+            font-weight: 800;
             letter-spacing: 2px;
+            text-align: center;
+            font-family: 'Baloo 2', 'Poppins', 'Montserrat', 'Comic Sans MS', 'Arial Rounded MT Bold', 'Roboto Mono', 'Courier New', monospace;
         }
+        
+        .header-logo {
+    height: 44px;
+    width: 44px;
+    margin-left: 50px;
+    margin-right: 80px;
+    display: block;
+    object-fit: contain;
+    align-self: center;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    padding: 2px;
+}
+
+        
         .main-container {
             display: flex;
             flex-direction: row;
-            height: calc(100vh - 70px);
+            justify-content: center;
+            align-items: flex-start;
+            min-height: calc(100vh - 70px - 160px);
+            gap: 32px;
+            margin-top: 40px;
+        }
+        .left-panel,
+        .right-panel,
+        .system-state {
+            margin-top: 0;
         }
         .left-panel {
             flex: 1.2;
             background: #23a8ff;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             position: relative;
+            min-width: 420px;
+            padding-left: 40px;
+            padding-top: 40px;
         }
         .robot-img-container {
             position: relative;
-            width: 90%;
-            max-width: 600px;
-            margin: 0 auto;
+            width: 480px;
+            max-width: 100vw;
+            margin: -32px 0 0 0;
         }
         .robot-img-container img {
             width: 100%;
@@ -56,73 +115,190 @@
         }
         .joint-marker {
             position: absolute;
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.98);
             color: #23a8ff;
             border: 2px solid #23a8ff;
-            border-radius: 50%;
-            width: 36px;
+            border-radius: 18px;
+            min-width: 70px;
             height: 36px;
+            padding: 0 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 700;
             cursor: pointer;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             transition: background 0.2s, transform 0.2s;
+            white-space: nowrap;
         }
         .joint-marker:hover {
             background: #b3e6ff;
-            transform: scale(1.1);
+            transform: scale(1.08);
         }
+        /* Modal styles */
+        .modal-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.25);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal {
+            background: linear-gradient(135deg, #fafdff 70%, #e3f4ff 100%);
+            border-radius: 36px;
+            padding: 32px 44px 36px 44px;
+            min-width: 370px;
+            max-width: 95vw;
+            box-shadow: 0 12px 48px 0 rgba(35,168,255,0.20), 0 2px 16px 0 rgba(0,0,0,0.10);
+            text-align: center;
+            position: relative;
+            font-family: 'Baloo 2', 'Comic Sans MS', 'Comic Sans', 'Arial Rounded MT Bold', 'Roboto Mono', 'Courier New', monospace;
+            border: 3.5px solid #23a8ff;
+        }
+        .modal h2 {
+            color: #23a8ff;
+            font-size: 34px;
+            margin-bottom: 10px;
+            margin-top: 0;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            font-family: 'Baloo 2', 'Comic Sans MS', 'Comic Sans', 'Arial Rounded MT Bold', 'Roboto Mono', 'Courier New', monospace;
+        }
+        .modal .modal-slider {
+            width: 100%;
+            margin: 28px 0 10px 0;
+        }
+        .modal .modal-slider input[type="range"] {
+            width: 100%;
+            accent-color: #23a8ff;
+            background: #e3f4ff;
+            border-radius: 12px;
+            height: 32px;
+            border: 2.5px solid #23a8ff;
+            box-shadow: 0 2px 10px rgba(35,168,255,0.13);
+        }
+        .modal .modal-value {
+            color: #23a8ff;
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 18px;
+            letter-spacing: 1.5px;
+            font-family: 'Baloo 2', 'Comic Sans MS', 'Comic Sans', 'Arial Rounded MT Bold', 'Roboto Mono', 'Courier New', monospace;
+        }
+        .modal .close-btn {
+            display: none;
+        }
+.modal .modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 24px;
+}
+.modal .modal-btn {
+    padding: 12px 38px;
+    font-size: 22px;
+    font-family: 'Baloo 2', 'Comic Sans MS', 'Comic Sans', 'Arial Rounded MT Bold', 'Roboto Mono', 'Courier New', monospace;
+    font-weight: 800;
+    border-radius: 32px;
+    border: 3px solid #23a8ff;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(35,168,255,0.13);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s, border 0.2s;
+}
+.modal .modal-btn.cancel {
+    background: #fff;
+    color: #23a8ff;
+    border: 3px solid #23a8ff;
+    font-weight: 800;
+}
+.modal .modal-btn.cancel:hover {
+    background: #e3f4ff;
+    color: #007acc;
+    border: 3px solid #007acc;
+}
+.modal .modal-btn.done {
+    background: #23a8ff;
+    color: #fff;
+    border: 3px solid #23a8ff;
+    font-weight: 800;
+}
+.modal .modal-btn.done:hover {
+            background: #007acc;
+            color: #fff;
+            border: 3px solid #007acc;
+        }
+.modal .close-btn:hover {
+    background: #23a8ff;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(35,168,255,0.18);
+}
         .right-panel {
-            flex: 1;
+            flex: 1.2;
             background: #23a8ff;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 40px 30px 40px 0;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+            min-width: 420px;
+            height: 100%;
+            padding-top: 40px;
         }
         .joint-control {
-            margin-bottom: 30px;
-            width: 100%;
+            margin-bottom: 28px;
+            width: 370px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 18px;
         }
         .joint-label {
             color: #fff;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 6px;
+            font-size: 26px;
+            font-weight: 800;
+            font-family: 'Baloo 2', 'Comic Sans MS', 'Comic Sans', 'Arial Rounded MT Bold', 'Roboto Mono', 'Courier New', monospace;
+            letter-spacing: 1px;
+            min-width: 110px;
+            text-align: right;
+            margin-bottom: 0;
         }
         .joint-slider {
-            width: 100%;
-            margin-bottom: 8px;
+            width: 210px;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
         }
         .joint-slider input[type="range"] {
             width: 100%;
             accent-color: #fff;
             background: #fff;
-            border-radius: 2px;
-            height: 6px;
+            border-radius: 4px;
+            height: 18px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.10);
         }
         .joint-value {
             color: #fff;
-            font-size: 15px;
-            font-weight: 700;
-            margin-left: 10px;
+            font-size: 22px;
+            font-weight: 800;
+            margin-left: 16px;
+            font-family: 'Baloo 2', 'Comic Sans MS', 'Comic Sans', 'Arial Rounded MT Bold', 'Roboto Mono', 'Courier New', monospace;
+            letter-spacing: 1px;
         }
         .btn {
             background: #fff;
             color: #23a8ff;
             border: none;
-            padding: 10px 24px;
+            padding: 12px 32px;
             border-radius: 24px;
             font-family: inherit;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             cursor: pointer;
             margin-top: 18px;
-            margin-right: 10px;
+            margin-bottom: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             transition: background 0.2s, color 0.2s;
         }
@@ -138,42 +314,92 @@
         .system-state {
             background: #fff;
             color: #23a8ff;
-            border-radius: 12px;
-            padding: 18px 22px;
-            margin-top: 30px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-radius: 18px;
+            padding: 36px 48px 36px 48px;
+            margin: 40px 0 0 0;
+            font-family: 'Baloo 2', 'Comic Sans MS', 'Comic Sans', 'Arial Rounded MT Bold', 'Courier New', monospace;
+            font-size: 20px;
+            line-height: 1.3;
+            box-shadow: 0 6px 32px rgba(35,168,255,0.13), 0 2px 16px rgba(0,0,0,0.10);
+            text-align: left;
+            max-width: 370px;
+            min-width: 240px;
+            align-self: flex-start;
+            height: 100%;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: stretch;
+            border: 3px solid #b3e6ff;
+            transition: box-shadow 0.3s, border 0.3s;
+        }
+        .system-state h2 {
+            color: #23a8ff;
+            font-size: 2.2em;
+            font-family: 'Baloo 2', 'Comic Sans MS', 'Comic Sans', 'Arial Rounded MT Bold', 'Roboto Mono', 'Courier New', monospace;
+            font-weight: 800;
+            margin-top: 0;
+            margin-bottom: 18px;
+            letter-spacing: 1.5px;
+            text-shadow: 0 2px 8px #e3f4ff;
+        }
+        .system-state b {
+            color: #23a8ff;
+            font-size: 1.15em;
+            font-family: 'Baloo 2', 'Comic Sans MS', 'Comic Sans', 'Arial Rounded MT Bold', 'Roboto Mono', 'Courier New', monospace;
+            font-weight: 800;
+            margin-top: 18px;
+            display: inline-block;
+        }
+        .system-state span, .system-state div {
+            color: #23a8ff;
+            font-family: inherit;
+        }
+        .system-state .state-section {
+            margin-bottom: 18px;
+        }
+        .system-state .state-label {
+            margin-bottom: 6px;
+            display: block;
         }
         @media (max-width: 900px) {
             .main-container {
                 flex-direction: column;
+                gap: 20px;
             }
             .right-panel {
-                padding: 30px 10px 30px 10px;
+                padding: 30px 0 30px 0;
                 align-items: center;
             }
             .left-panel {
-                padding: 20px 0;
+                padding: 40px ;
+            }
+            .robot-img-container {
+                width: 90vw;
+                max-width: 98vw;
             }
         }
     </style>
 </head>
 <body>
     <div class="header-bar">
-        <h1>OUTREACH MINI ROBOT ARMS</h1>
+        <img src="MA LOGO.png" alt="Logo" class="header-logo">
+        <h1>OUTREACH MINI ROBOT ARM CONTROLLER</h1>
+        <div class="status-indicator">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">DISCONNECTED</span>
+        </div>
     </div>
     <div class="main-container">
         <div class="left-panel">
             <div class="robot-img-container">
                 <img src="kuka_image.png" alt="KUKA Arm">
                 <!-- Joint markers for 5 joints (positions are illustrative, adjust as needed) -->
-                <div class="joint-marker" style="top: 8%; left: 60%;" onclick="focusServoInput(1)"></div>
-                <div class="joint-marker" style="top: 22%; left: 80%;" onclick="focusServoInput(2)"></div>
-                <div class="joint-marker" style="top: 60%; left: 38%;" onclick="focusServoInput(3)"></div>
-                <div class="joint-marker" style="top: 15%; left: 30%;" onclick="focusServoInput(4)"></div>
-                <div class="joint-marker" style="top: 55%; left: 75%;" onclick="focusServoInput(5)"></div>
+                <div class="joint-marker" style="top:80%; left: 10%;" data-joint="1">Base</div>
+                <div class="joint-marker" style="top: 35%; left: 70%;" data-joint="2">Joint 1</div>
+                <div class="joint-marker" style="top: 60%; left: 38%;" data-joint="3">Joint 2</div>
+                <div class="joint-marker" style="top: 17%; left: 40%;" data-joint="4">Joint 3</div>
+                <div class="joint-marker" style="top: 20%; left: 0%;" data-joint="5">Gripper</div>
             </div>
         </div>
         <div class="right-panel">
@@ -182,16 +408,49 @@
             </div>
             <button id="sendBtn" class="btn" disabled>EXECUTE POSITION</button>
             <button class="btn btn-secondary" onclick="resetAllServos()">RESET ARM</button>
-            <div class="system-state" id="currentState">
-                // System Status: Standby<br>
-                // Joint Positions: [90°, 90°, 90°, 90°, 90°]<br>
-                // Last Command: None<br>
-                // Connection: Offline
-            </div>
+        </div>
+        <div class="system-state" id="currentState">
+            <h2>Current System State</h2>
+            <b>System Status:</b> <span id="statusText">Standby</span><br>
+            <b>Joint Positions:</b> <span id="positionsText">[90°, 90°, 90°, 90°, 90°]</span><br>
+            <b>Last Command:</b> <span id="lastCommandText">None</span><br>
+            <b>Connection:</b> <span id="connectionText">Offline</span>
         </div>
     </div>
-    <script src="kuka_control.js"></script>
-    <script>
+    <!-- Modal root for popups, must be outside all flex containers for correct stacking -->
+    <div id="modalRoot"></div>
+<script src="kuka_control.js"></script>
+<script>
+// Example: update status indicator (call this from your JS logic as needed)
+function setConnectionStatus(connected) {
+    const dot = document.getElementById('statusDot');
+    const text = document.getElementById('statusText');
+    if (connected) {
+        dot.classList.add('connected');
+        text.textContent = 'CONNECTED';
+    } else {
+        dot.classList.remove('connected');
+        text.textContent = 'DISCONNECTED';
+    }
+}
+</script>
+<script>
+    // Reset all servos to 90 degrees
+    function resetAllServos() {
+        const numJoints = 5;
+        for (let i = 1; i <= numJoints; i++) {
+            const slider = document.getElementById(`slider${i}`);
+            const valueSpan = document.getElementById(`value${i}`);
+            const input = document.getElementById(`input${i}`);
+            if (slider) slider.value = 90;
+            if (valueSpan) valueSpan.textContent = '90°';
+            if (input) input.value = 90;
+        }
+        if (window.kukaController) {
+            window.kukaController.servoAngles = [90, 90, 90, 90, 90];
+            window.kukaController.updateSystemState();
+        }
+    }
     // UI rendering for new look, backend logic in kuka_control.js
     document.addEventListener('DOMContentLoaded', function() {
         // Number of joints (update if needed)
@@ -222,6 +481,94 @@
             input.style.display = 'none';
             document.body.appendChild(input);
         }
+        // Add event listeners to update value on slider change
+        for (let i = 1; i <= numJoints; i++) {
+            const slider = document.getElementById(`slider${i}`);
+            const valueSpan = document.getElementById(`value${i}`);
+            const input = document.getElementById(`input${i}`);
+            slider.addEventListener('input', function() {
+                valueSpan.textContent = this.value + '°';
+                input.value = this.value;
+                if (window.kukaController) {
+                    window.kukaController.servoAngles[i-1] = parseInt(this.value);
+                    window.kukaController.updateSystemState();
+                }
+            });
+        }
+
+        // Modal logic for joint markers
+        function showJointModal(jointNum, jointName) {
+            // Remove any existing modal
+            const modalRoot = document.getElementById('modalRoot');
+            modalRoot.innerHTML = '';
+
+            // Get current value
+            const slider = document.getElementById(`slider${jointNum}`);
+            const input = document.getElementById(`input${jointNum}`);
+            let value = slider.value;
+            let tempValue = value;
+
+            // Modal HTML
+            const modalBg = document.createElement('div');
+            modalBg.className = 'modal-bg';
+            modalBg.id = 'jointModalBg';
+            modalBg.innerHTML = `
+                <div class="modal">
+                    <h2>${jointName} Angle</h2>
+                    <div class="modal-value" id="modalValue">${value}°</div>
+                    <div class="modal-slider">
+                        <input type="range" min="0" max="180" value="${value}" id="modalSlider">
+                    </div>
+                    <div class="modal-actions">
+                        <button class="modal-btn cancel" id="modalCancelBtn">Cancel</button>
+                        <button class="modal-btn done" id="modalDoneBtn">Done</button>
+                    </div>
+                </div>
+            `;
+            modalRoot.appendChild(modalBg);
+
+            // Modal slider logic
+            const modalSlider = document.getElementById('modalSlider');
+            const modalValue = document.getElementById('modalValue');
+            modalSlider.addEventListener('input', function() {
+                tempValue = this.value;
+                modalValue.textContent = this.value + '°';
+            });
+            // Cancel button: close modal, revert value
+            document.getElementById('modalCancelBtn').onclick = function() {
+                modalRoot.innerHTML = '';
+            };
+            // Done button: set value, update UI, close modal
+            document.getElementById('modalDoneBtn').onclick = function() {
+                slider.value = tempValue;
+                input.value = tempValue;
+                document.getElementById(`value${jointNum}`).textContent = tempValue + '°';
+                if (window.kukaController) {
+                    window.kukaController.servoAngles[jointNum-1] = parseInt(tempValue);
+                    window.kukaController.updateSystemState();
+                }
+                modalRoot.innerHTML = '';
+            };
+        }
+
+        // Attach modal to joint markers
+        document.querySelectorAll('.joint-marker').forEach(marker => {
+            marker.addEventListener('click', function(e) {
+                const jointNum = parseInt(this.getAttribute('data-joint'));
+                const jointName = this.textContent;
+                showJointModal(jointNum, jointName);
+            });
+        });
+
+        // Patch: update system state in a more user/kid friendly way
+        function updateSystemStateUI(status, positions, lastCommand, connection) {
+            document.getElementById('statusText').textContent = status;
+            document.getElementById('positionsText').textContent = positions;
+            document.getElementById('lastCommandText').textContent = lastCommand;
+            document.getElementById('connectionText').textContent = connection;
+        }
+        // Expose for kuka_control.js to call
+        window.updateSystemStateUI = updateSystemStateUI;
     });
     </script>
 </body>
