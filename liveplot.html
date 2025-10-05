@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servo Control Panel</title>
+    <title>Mini Kuka Control Panel</title>
     <style>
         * {
             margin: 0;
@@ -12,59 +12,337 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            padding: 25px;
+            overflow-x: hidden;
         }
         
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            padding: 40px;
-            max-width: 500px;
-            width: 100%;
-        }
-        
-        h1 {
+        .header {
             text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 28px;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
         }
         
-        .section {
-            margin-bottom: 30px;
-            padding: 20px;
-            border-radius: 15px;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-        }
-        
-        .section h2 {
-            color: #495057;
+        .header h1 {
+            font-size: 42px;
+            font-weight: 700;
             margin-bottom: 15px;
-            font-size: 18px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .connection-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(255,255,255,0.1);
+            padding: 35px;
+            margin-bottom: 40px;
+            max-width: 900px;
+            margin-right: auto;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .connection-section h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 24px;
         }
         
         .connection-controls {
+            display: grid;
+            grid-template-columns: 3fr 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .servo-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1);
+            padding: 40px;
+            margin-bottom: 40px;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+        
+        .servo-section h2 {
+            color: #2d3748;
+            margin-bottom: 35px;
+            font-size: 28px;
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+        }
+        
+        .servo-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+        
+        .servo-controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .servo-control {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 18px;
+            padding: 28px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: slideInUp 0.6s ease-out backwards;
+        }
+        
+        .servo-control::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            border-radius: 18px 18px 0 0;
+        }
+        
+        .servo-control:hover {
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15), 0 0 0 1px rgba(102, 126, 234, 0.1);
+        }
+        
+        .servo-control:nth-child(1) { animation-delay: 0.1s; }
+        .servo-control:nth-child(2) { animation-delay: 0.2s; }
+        .servo-control:nth-child(3) { animation-delay: 0.3s; }
+        .servo-control:nth-child(4) { animation-delay: 0.4s; }
+        .servo-control:nth-child(5) { animation-delay: 0.5s; }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .servo-header {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .servo-header h3 {
+            color: #2d3748;
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .servo-header h3::before {
+            content: '⚙️';
+            font-size: 16px;
+        }
+        
+        .angle-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            position: relative;
+            min-width: 60px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .angle-display::before {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            border-radius: 28px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .servo-control:hover .angle-display {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.5);
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .slider-container span {
+            font-weight: 700;
+            color: #4a5568;
+            min-width: 40px;
+            text-align: center;
+            font-size: 14px;
+            padding: 4px 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .connection-section h2 {
+            color: #2d3748;
+            margin-bottom: 25px;
+            font-size: 26px;
+            font-weight: 600;
+            position: relative;
+            display: flex;
+            align-items: center;
             gap: 10px;
-            margin-bottom: 15px;
+        }
+        
+        .connection-section h2::before {
+            content: '🔗';
+            font-size: 20px;
+        }
+        
+        .slider {
+            flex: 1;
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e0 100%);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .slider::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+            border-radius: 6px;
+            width: var(--value, 50%);
+            transition: width 0.3s ease;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15), 0 0 0 3px rgba(102, 126, 234, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid #667eea;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2), 0 0 0 4px rgba(102, 126, 234, 0.3);
+        }
+        
+        .slider::-webkit-slider-thumb:active {
+            transform: scale(1.25);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            cursor: pointer;
+            border: 2px solid #667eea;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15), 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+        
+        .angle-input {
+            width: 80px;
+            text-align: center;
+            padding: 8px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .angle-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .control-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
         }
         
         select, input {
-            padding: 10px;
+            padding: 12px;
             border: 2px solid #dee2e6;
             border-radius: 8px;
             font-size: 14px;
-            flex: 1;
-            min-width: 120px;
         }
         
         select:focus, input:focus {
@@ -74,39 +352,73 @@
         }
         
         button {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
         }
         
         button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:hover::before {
+            left: 100%;
         }
         
         button:active {
-            transform: translateY(0);
+            transform: translateY(-1px) scale(0.98);
         }
         
         button:disabled {
-            background: #6c757d;
+            background: linear-gradient(135deg, #9ca3af, #6b7280);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
         
+        button:disabled::before {
+            display: none;
+        }
+        
+        .preset-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+            font-size: 13px;
+            padding: 12px 24px;
+        }
+        
+        .preset-btn:hover {
+            box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+        }
+        
         .status {
             text-align: center;
             font-weight: bold;
-            padding: 8px;
-            border-radius: 6px;
-            margin-top: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
         }
         
         .status.disconnected {
@@ -119,135 +431,132 @@
             color: #155724;
         }
         
-        .servo-control {
-            margin-bottom: 25px;
-        }
-        
-        .servo-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .servo-header h3 {
-            color: #495057;
-            font-size: 16px;
-        }
-        
-        .angle-display {
-            background: #667eea;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .slider {
-            flex: 1;
-            height: 8px;
-            border-radius: 4px;
-            background: #dee2e6;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        .slider::-webkit-slider-thumb {
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-        
-        .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-        
-        .angle-input {
-            width: 70px;
-            text-align: center;
-        }
-        
         .current-values {
             text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            color: #495057;
-            padding: 15px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-radius: 10px;
-            margin-top: 20px;
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            padding: 25px 40px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            line-height: 1.6;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .current-values::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
         }
         
         .warning {
             background: #fff3cd;
             color: #856404;
-            padding: 10px;
-            border-radius: 6px;
-            margin-top: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
             font-size: 14px;
         }
         
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
+        /* Responsive Design */
+        @media (min-width: 1400px) {
+            .servo-controls-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+        
+        @media (min-width: 1000px) and (max-width: 1399px) {
+            .servo-controls-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (min-width: 600px) and (max-width: 999px) {
+            .servo-controls-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
             }
             
             .connection-controls {
-                flex-direction: column;
+                grid-template-columns: 1fr;
+                gap: 10px;
             }
             
-            select, input, button {
-                width: 100%;
+            .servo-controls-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .control-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .slider-container {
+                gap: 10px;
+            }
+            
+            .angle-input {
+                width: 60px;
+            }
+            
+            .header h1 {
+                font-size: 28px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🤖 Servo Control Panel</h1>
-        
-        <div class="section">
-            <h2>Serial Connection</h2>
-            <div class="connection-controls">
-                <select id="portSelect">
-                    <option value="">Select Port</option>
-                </select>
-                <select id="baudSelect">
-                    <option value="9600">9600</option>
-                    <option value="19200">19200</option>
-                    <option value="38400">38400</option>
-                    <option value="57600">57600</option>
-                    <option value="115200">115200</option>
-                </select>
-                <button id="connectBtn">Connect</button>
-            </div>
-            <div id="status" class="status disconnected">Disconnected</div>
-            <div class="warning">
-                ⚠️ Web Serial API requires Chrome/Edge browser and HTTPS
-            </div>
+    <div class="header">
+        <h1>🤖 Mini Kuka Control Panel</h1>
+    </div>
+    
+    <div class="connection-section">
+        <h2>Serial Connection</h2>
+        <div class="connection-controls">
+            <select id="portSelect">
+                <option value="">Select Port</option>
+            </select>
+            <select id="baudSelect">
+                <option value="9600">9600</option>
+                <option value="19200">19200</option>
+                <option value="38400">38400</option>
+                <option value="57600">57600</option>
+                <option value="115200">115200</option>
+            </select>
+            <button id="connectBtn">Connect</button>
         </div>
+        <div id="status" class="status disconnected">Disconnected</div>
+        <div class="warning">
+            ⚠️ Web Serial API requires Chrome/Edge browser and HTTPS
+        </div>
+    </div>
+    
+    <div class="servo-section">
+        <h2>Servo Controls</h2>
         
-        <div class="section">
-            <h2>Servo Controls</h2>
-            
+        <div class="servo-controls-grid">
             <div class="servo-control">
                 <div class="servo-header">
                     <h3>Servo 1</h3>
@@ -274,12 +583,55 @@
                 </div>
             </div>
             
-            <button id="sendBtn" disabled>Send Angles</button>
+            <div class="servo-control">
+                <div class="servo-header">
+                    <h3>Servo 3</h3>
+                    <div class="angle-display" id="servo3Display">90°</div>
+                </div>
+                <div class="slider-container">
+                    <span>0°</span>
+                    <input type="range" id="servo3Slider" class="slider" min="0" max="180" value="90">
+                    <span>180°</span>
+                    <input type="number" id="servo3Input" class="angle-input" min="0" max="180" value="90">
+                </div>
+            </div>
             
-            <div class="current-values" id="currentValues">
-                Servo 1: 90° | Servo 2: 90°
+            <div class="servo-control">
+                <div class="servo-header">
+                    <h3>Servo 4</h3>
+                    <div class="angle-display" id="servo4Display">90°</div>
+                </div>
+                <div class="slider-container">
+                    <span>0°</span>
+                    <input type="range" id="servo4Slider" class="slider" min="0" max="180" value="90">
+                    <span>180°</span>
+                    <input type="number" id="servo4Input" class="angle-input" min="0" max="180" value="90">
+                </div>
+            </div>
+            
+            <div class="servo-control">
+                <div class="servo-header">
+                    <h3>Servo 5</h3>
+                    <div class="angle-display" id="servo5Display">90°</div>
+                </div>
+                <div class="slider-container">
+                    <span>0°</span>
+                    <input type="range" id="servo5Slider" class="slider" min="0" max="180" value="90">
+                    <span>180°</span>
+                    <input type="number" id="servo5Input" class="angle-input" min="0" max="180" value="90">
+                </div>
             </div>
         </div>
+        
+        <div class="control-buttons">
+            <button id="sendBtn" disabled>Send All Angles</button>
+            <button class="preset-btn" id="homeBtn">Home Position</button>
+            <button class="preset-btn" id="resetBtn">Reset All</button>
+        </div>
+    </div>
+    
+    <div class="current-values" id="currentValues">
+        S1: 90° | S2: 90° | S3: 90° | S4: 90° | S5: 90°
     </div>
 
     <script>
@@ -287,41 +639,59 @@
             constructor() {
                 this.port = null;
                 this.connected = false;
-                this.servo1Angle = 90;
-                this.servo2Angle = 90;
+                this.servoAngles = [90, 90, 90, 90, 90]; // 5 servos, all at 90 degrees initially
                 
                 this.initElements();
                 this.setupEventListeners();
                 this.checkWebSerialSupport();
+                this.updateCurrentValues();
             }
             
             initElements() {
                 this.connectBtn = document.getElementById('connectBtn');
                 this.statusDiv = document.getElementById('status');
                 this.sendBtn = document.getElementById('sendBtn');
-                
-                this.servo1Slider = document.getElementById('servo1Slider');
-                this.servo1Input = document.getElementById('servo1Input');
-                this.servo1Display = document.getElementById('servo1Display');
-                
-                this.servo2Slider = document.getElementById('servo2Slider');
-                this.servo2Input = document.getElementById('servo2Input');
-                this.servo2Display = document.getElementById('servo2Display');
-                
                 this.currentValues = document.getElementById('currentValues');
+                
+                // Initialize servo elements
+                this.servos = [];
+                for (let i = 1; i <= 5; i++) {
+                    this.servos.push({
+                        slider: document.getElementById(`servo${i}Slider`),
+                        input: document.getElementById(`servo${i}Input`),
+                        display: document.getElementById(`servo${i}Display`)
+                    });
+                }
+                
+                // Preset buttons
+                this.homeBtn = document.getElementById('homeBtn');
+                this.resetBtn = document.getElementById('resetBtn');
             }
             
             setupEventListeners() {
                 this.connectBtn.addEventListener('click', () => this.toggleConnection());
                 this.sendBtn.addEventListener('click', () => this.sendAngles());
                 
-                // Servo 1 controls
-                this.servo1Slider.addEventListener('input', () => this.updateServo1());
-                this.servo1Input.addEventListener('input', () => this.updateServo1FromInput());
+                // Setup servo controls
+                for (let i = 0; i < 5; i++) {
+                    this.servos[i].slider.addEventListener('input', () => this.updateServo(i));
+                    this.servos[i].input.addEventListener('input', () => this.updateServoFromInput(i));
+                    
+                    // Update slider fill on input
+                    this.servos[i].slider.addEventListener('input', (e) => {
+                        const value = (e.target.value - e.target.min) / (e.target.max - e.target.min) * 100;
+                        e.target.style.setProperty('--value', value + '%');
+                    });
+                    
+                    // Initialize slider fill
+                    const initialValue = (this.servos[i].slider.value - this.servos[i].slider.min) / 
+                                       (this.servos[i].slider.max - this.servos[i].slider.min) * 100;
+                    this.servos[i].slider.style.setProperty('--value', initialValue + '%');
+                }
                 
-                // Servo 2 controls
-                this.servo2Slider.addEventListener('input', () => this.updateServo2());
-                this.servo2Input.addEventListener('input', () => this.updateServo2FromInput());
+                // Preset button events
+                this.homeBtn.addEventListener('click', () => this.setHomePosition());
+                this.resetBtn.addEventListener('click', () => this.resetAllServos());
             }
             
             checkWebSerialSupport() {
@@ -350,6 +720,10 @@
                     this.statusDiv.className = 'status connected';
                     this.sendBtn.disabled = false;
                     
+                    // Enable preset buttons
+                    this.homeBtn.disabled = false;
+                    this.resetBtn.disabled = false;
+                    
                     console.log('✓ Connected to serial port');
                     this.sendAngles(); // Send initial position
                     
@@ -371,69 +745,94 @@
                 this.statusDiv.className = 'status disconnected';
                 this.sendBtn.disabled = true;
                 
+                // Disable preset buttons
+                this.homeBtn.disabled = true;
+                this.resetBtn.disabled = true;
+                
                 console.log('✓ Disconnected');
             }
             
-            updateServo1() {
-                this.servo1Angle = parseInt(this.servo1Slider.value);
-                this.servo1Input.value = this.servo1Angle;
-                this.servo1Display.textContent = `${this.servo1Angle}°`;
+            updateServo(servoIndex) {
+                const angle = parseInt(this.servos[servoIndex].slider.value);
+                this.servoAngles[servoIndex] = angle;
+                this.servos[servoIndex].input.value = angle;
+                this.servos[servoIndex].display.textContent = `${angle}°`;
+                
+                // Update slider fill
+                const value = (angle - this.servos[servoIndex].slider.min) / 
+                             (this.servos[servoIndex].slider.max - this.servos[servoIndex].slider.min) * 100;
+                this.servos[servoIndex].slider.style.setProperty('--value', value + '%');
+                
                 this.updateCurrentValues();
                 
                 if (this.connected) {
-                     this.sendAngles();
+                    this.sendAngles();
                 }
             }
             
-            updateServo1FromInput() {
-                const value = parseInt(this.servo1Input.value);
+            updateServoFromInput(servoIndex) {
+                const value = parseInt(this.servos[servoIndex].input.value);
                 if (value >= 0 && value <= 180) {
-                    this.servo1Angle = value;
-                    this.servo1Slider.value = value;
-                    this.servo1Display.textContent = `${value}°`;
+                    this.servoAngles[servoIndex] = value;
+                    this.servos[servoIndex].slider.value = value;
+                    this.servos[servoIndex].display.textContent = `${value}°`;
+                    
+                    // Update slider fill
+                    const fillValue = (value - this.servos[servoIndex].slider.min) / 
+                                     (this.servos[servoIndex].slider.max - this.servos[servoIndex].slider.min) * 100;
+                    this.servos[servoIndex].slider.style.setProperty('--value', fillValue + '%');
+                    
                     this.updateCurrentValues();
                     
                     if (this.connected) {
-                         this.sendAngles();
-                    }
-                }
-            }
-            
-            updateServo2() {
-                this.servo2Angle = parseInt(this.servo2Slider.value);
-                this.servo2Input.value = this.servo2Angle;
-                this.servo2Display.textContent = `${this.servo2Angle}°`;
-                this.updateCurrentValues();
-                
-                if (this.connected) {
-                     this.sendAngles();
-                 }
-            }
-            
-            updateServo2FromInput() {
-                const value = parseInt(this.servo2Input.value);
-                if (value >= 0 && value <= 180) {
-                    this.servo2Angle = value;
-                    this.servo2Slider.value = value;
-                    this.servo2Display.textContent = `${value}°`;
-                    this.updateCurrentValues();
-                    
-                    if (this.connected) {
-                         this.sendAngles();
+                        this.sendAngles();
                     }
                 }
             }
             
             updateCurrentValues() {
-                this.currentValues.textContent = `Servo 1: ${this.servo1Angle}° | Servo 2: ${this.servo2Angle}°`;
+                const values = this.servoAngles.map((angle, index) => `S${index + 1}: ${angle}°`).join(' | ');
+                this.currentValues.textContent = values;
+            }
+            
+            setHomePosition() {
+                // Home position: all servos at 90 degrees
+                for (let i = 0; i < 5; i++) {
+                    this.setServoAngle(i, 90);
+                }
+            }
+            
+            resetAllServos() {
+                // Reset to middle position (90 degrees)
+                this.setHomePosition();
+            }
+            
+            setServoAngle(servoIndex, angle) {
+                this.servoAngles[servoIndex] = angle;
+                this.servos[servoIndex].slider.value = angle;
+                this.servos[servoIndex].input.value = angle;
+                this.servos[servoIndex].display.textContent = `${angle}°`;
+                
+                // Update slider fill
+                const value = (angle - this.servos[servoIndex].slider.min) / 
+                             (this.servos[servoIndex].slider.max - this.servos[servoIndex].slider.min) * 100;
+                this.servos[servoIndex].slider.style.setProperty('--value', value + '%');
+                
+                this.updateCurrentValues();
+                
+                if (this.connected) {
+                    this.sendAngles();
+                }
             }
             
             async sendAngles() {
                 if (!this.connected || !this.port) return;
                 
                 try {
-                    const command = `S1 ${this.servo1Angle},S2 ${this.servo2Angle}\n`; // S1 90, S2 90
-                    //const command = `S2 ${this.servo2Angle}\n`;
+                    // Send command for all 5 servos
+                    const commands = this.servoAngles.map((angle, index) => `S${index + 1} ${angle}`).join(',');
+                    const command = `${commands}\n`;
+                    
                     const encoder = new TextEncoder();
                     const writer = this.port.writable.getWriter();
                     
