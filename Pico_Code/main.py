@@ -6,17 +6,17 @@ import time
 
 
 
-J1 = Servo_MA(pwm_pin=16, joint_number="1",min_us=500, max_us=2500, freq=50)
-J2= Servo_MA(pwm_pin=17, joint_number="2",min_us=500, max_us=2500, freq=50)
-J3= Servo_MA(pwm_pin=18, joint_number="3",min_us=500, max_us=2500, freq=50)
-J4= Servo_MA(pwm_pin=19, joint_number="4",min_us=500, max_us=2500, freq=50)
-J5= Servo_MA(pwm_pin=20, joint_number="5",min_us=500, max_us=2500, freq=50)
+J1 = Servo_MA(pwm_pin=0, joint_number="1",min_us=500, max_us=2500, freq=50)
+J2= Servo_MA(pwm_pin=1, joint_number="2",min_us=500, max_us=2500, freq=50)
+J3= Servo_MA(pwm_pin=2, joint_number="3",min_us=500, max_us=2500, freq=50)
+J4= Servo_MA(pwm_pin=3, joint_number="4",min_us=500, max_us=2500, freq=50)
+J5= Servo_MA(pwm_pin=5, joint_number="5",min_us=500, max_us=2500, freq=50)
 
 J1.set_angle(90)
 J2.set_angle(90)
 J3.set_angle(90)
 J4.set_angle(90)
-#J5.set_angle(90)
+J5.set_angle(90)
 
 
 
