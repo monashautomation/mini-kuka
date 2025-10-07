@@ -384,10 +384,12 @@
 <body>
     <div class="header-bar">
         <img src="MA LOGO.png" alt="Logo" class="header-logo">
-        <h1>OUTREACH MINI ROBOT ARM CONTROLLER</h1>
+        <h1>OUTREACH MINI ROBOT ARM      </h1>
+        <!-- Connect button required by kuka_control.js -->
+        <button id="connectBtn" class="btn" style="margin-left:12px;">CONNECT</button>
         <div class="status-indicator">
             <div class="status-dot" id="statusDot"></div>
-            <span id="statusText">DISCONNECTED</span>
+            <span id="headerStatusText">DISCONNECTED</span>
         </div>
     </div>
     <div class="main-container">
@@ -411,29 +413,18 @@
         </div>
         <div class="system-state" id="currentState">
             <h2>Current System State</h2>
-            <b>System Status:</b> <span id="statusText">Standby</span><br>
+            <b>System Status:</b> <span id="systemStatusText">Standby</span><br>
             <b>Joint Positions:</b> <span id="positionsText">[90°, 90°, 90°, 90°, 90°]</span><br>
             <b>Last Command:</b> <span id="lastCommandText">None</span><br>
             <b>Connection:</b> <span id="connectionText">Offline</span>
+            <div class="state-section">
+                <label class="state-label">Serial log (Pico replies):</label>
+                <pre id="serialLog" style="max-height:120px; overflow:auto; background:#eef9ff; color:#073763; padding:8px; border-radius:8px; border:1px solid #bfe6ff; white-space:pre-wrap;"></pre>
+            </div>
         </div>
     </div>
     <!-- Modal root for popups, must be outside all flex containers for correct stacking -->
     <div id="modalRoot"></div>
-<script src="kuka_control.js"></script>
-<script>
-// Example: update status indicator (call this from your JS logic as needed)
-function setConnectionStatus(connected) {
-    const dot = document.getElementById('statusDot');
-    const text = document.getElementById('statusText');
-    if (connected) {
-        dot.classList.add('connected');
-        text.textContent = 'CONNECTED';
-    } else {
-        dot.classList.remove('connected');
-        text.textContent = 'DISCONNECTED';
-    }
-}
-</script>
 <script>
     // Reset all servos to 90 degrees
     function resetAllServos() {
@@ -562,14 +553,29 @@ function setConnectionStatus(connected) {
 
         // Patch: update system state in a more user/kid friendly way
         function updateSystemStateUI(status, positions, lastCommand, connection) {
-            document.getElementById('statusText').textContent = status;
+            const s = document.getElementById('systemStatusText'); if (s) s.textContent = status;
             document.getElementById('positionsText').textContent = positions;
             document.getElementById('lastCommandText').textContent = lastCommand;
             document.getElementById('connectionText').textContent = connection;
-        }
-        // Expose for kuka_control.js to call
-        window.updateSystemStateUI = updateSystemStateUI;
-    });
-    </script>
-</body>
-</html>
+         }
+         // Define connection helper (was previously missing) so controller can call it
+         function setConnectionStatus(connected) {
+             const dot = document.getElementById('statusDot');
+             const header = document.getElementById('headerStatusText');
+             if (dot) {
+                 if (connected) dot.classList.add('connected'); else dot.classList.remove('connected');
+             }
+             if (header) header.textContent = connected ? 'CONNECTED' : 'DISCONNECTED';
+             const conn = document.getElementById('connectionText'); if (conn) conn.textContent = connected ? 'Online' : 'Offline';
+             const sendBtn = document.getElementById('sendBtn'); if (sendBtn) sendBtn.disabled = !connected;
+         }
+          // Expose for kuka_control.js to call
+          window.updateSystemStateUI = updateSystemStateUI;
+          // Expose connection helper for controller
+          window.setConnectionStatus = setConnectionStatus;
+      });
+      </script>
+<!-- load controller AFTER DOM setup so it can safely bind elements -->
+<script src="kuka_control.js"></script>
+ </body>
+ </html>

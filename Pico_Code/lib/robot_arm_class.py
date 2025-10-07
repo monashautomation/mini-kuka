@@ -35,8 +35,12 @@ class Servo_MA:
         period_us = 1_000_000 // self.freq
         duty = int((pulse_us / period_us) * 65535) 
         print(f"Setting angle to {angle}°, pulse width: {pulse_us}us, duty: {duty}")
-        self.lp_angle = self.lp_angle * 0.9 + angle * 0.1 if self.lp_angle is not None else angle
-        self.curent_angle = angle
+        # update last-position smoothing and current angle
+        if self.lp_angle is None:
+            self.lp_angle = angle
+        else:
+            self.lp_angle = self.lp_angle * 0.9 + angle * 0.1
+        self.current_angle = angle
         self.pwm.duty_u16(duty)
 
 

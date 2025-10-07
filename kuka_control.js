@@ -23,7 +23,8 @@ class KukaController {
     initElements() {
         this.connectBtn = document.getElementById('connectBtn');
         this.statusDot = document.getElementById('statusDot');
-        this.statusText = document.getElementById('statusText');
+        // prefer new header/system ids; fall back if old id exists
+        this.statusText = document.getElementById('headerStatusText') || document.getElementById('statusText');
         this.sendBtn = document.getElementById('sendBtn');
         this.servoGrid = document.getElementById('servoGrid');
         this.currentState = document.getElementById('currentState');
@@ -120,12 +121,17 @@ class KukaController {
         const status = this.connected ? 'Online' : 'Offline';
         const positions = this.servoAngles.map(angle => `${angle}°`).join(', ');
         
-        this.currentState.innerHTML = `
-// System Status: ${this.connected ? 'Active' : 'Standby'}
-// Joint Positions: [${positions}]
-// Last Command: ${this.lastCommand}
-// Connection: ${status}
-        `.trim();
+        // If the page provides an updateSystemStateUI helper (we added it to the HTML), use that
+        if (window.updateSystemStateUI) {
+            const uiStatus = this.connected ? 'Active' : 'Standby';
+            window.updateSystemStateUI(uiStatus, `[${positions}]`, this.lastCommand, status);
+            return;
+        }
+
+        // Fallback: write a simple textual block
+        if (this.currentState) {
+            this.currentState.innerHTML = `\n// System Status: ${this.connected ? 'Active' : 'Standby'}\n// Joint Positions: [${positions}]\n// Last Command: ${this.lastCommand}\n// Connection: ${status}`.trim();
+        }
     }
 
     // Toggle serial connection (connect/disconnect)
@@ -145,41 +151,98 @@ class KukaController {
             
             this.connected = true;
             this.connectBtn.textContent = 'DISCONNECT';
-            this.statusDot.classList.add('connected');
-            this.statusText.textContent = 'CONNECTED';
-            this.sendBtn.disabled = false;
-            this.lastCommand = 'Connected';
-            this.updateSystemState();
-            
-            console.log('[SYSTEM] Serial connection established');
-            
-        } catch (error) {
-            console.error('[ERROR] Connection failed:', error);
-            alert(`Connection failed: ${error.message}`);
+            if (this.statusDot) this.statusDot.classList.add('connected');
+            // Prefer using page helper so we don't rely on specific element ids
+            if (window.setConnectionStatus) {
+                window.setConnectionStatus(true);
+            } else {
+                if (this.statusText) this.statusText.textContent = 'CONNECTED';
+                if (this.sendBtn) this.sendBtn.disabled = false;
+            }
+             this.lastCommand = 'Connected';
+             this.updateSystemState();
+             
+             console.log('[SYSTEM] Serial connection established');
+
+            // Start a background read loop to show incoming Pico replies
+            this.startReading();
+             
+         } catch (error) {
+             console.error('[ERROR] Connection failed:', error);
+             alert(`Connection failed: ${error.message}`);
+         }
+     }
+
+    // Start reading incoming serial data and display in serial log
+    async startReading() {
+        if (!this.port || !this.port.readable) return;
+        try {
+            const textDecoder = new TextDecoderStream();
+            this.readableStreamClosed = this.port.readable.pipeTo(textDecoder.writable);
+            const reader = textDecoder.readable.getReader();
+            this._reader = reader;
+            while (this.connected) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                if (value) {
+                    // incoming data may contain multiple lines; split and append
+                    const lines = value.split(/\r?\n/).filter(l => l.trim().length);
+                    for (const line of lines) {
+                        this.appendSerialLog(line);
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('Read loop error:', e);
         }
     }
 
-    // Close serial port and update UI on disconnect
-    disconnect() {
-        if (this.port) {
-            this.port.close();
-            this.port = null;
+    // Append a line to the serial log area in the UI
+    appendSerialLog(text) {
+        try {
+            const pre = document.getElementById('serialLog');
+            if (!pre) return;
+            const now = new Date().toLocaleTimeString();
+            pre.textContent += `[${now}] ${text}\n`;
+            pre.scrollTop = pre.scrollHeight;
+        } catch (e) {
+            console.error('Failed to append serial log', e);
         }
-        
-        this.connected = false;
-        this.connectBtn.textContent = 'CONNECT';
-        this.statusDot.classList.remove('connected');
-        this.statusText.textContent = 'DISCONNECTED';
-        this.sendBtn.disabled = true;
-        this.lastCommand = 'Disconnected';
-        this.updateSystemState();
-        
-        console.log('[SYSTEM] Serial connection terminated');
     }
+
+     // Close serial port and update UI on disconnect
+     disconnect() {
+         if (this.port) {
+             // close reader if running
+             try { if (this._reader) { this._reader.cancel(); this._reader.releaseLock(); } } catch (e) {}
+             try { if (this.readableStreamClosed) { this.readableStreamClosed.catch(()=>{}); } } catch (e) {}
+             try { this.port.close(); } catch (e) {}
+             this.port = null;
+         }
+         
+         this.connected = false;
+         this.connectBtn.textContent = 'CONNECT';
+         if (this.statusDot) this.statusDot.classList.remove('connected');
+         if (window.setConnectionStatus) {
+             window.setConnectionStatus(false);
+         } else {
+             if (this.statusText) this.statusText.textContent = 'DISCONNECTED';
+             if (this.sendBtn) this.sendBtn.disabled = true;
+         }
+         this.lastCommand = 'Disconnected';
+         this.updateSystemState();
+         
+         console.log('[SYSTEM] Serial connection terminated');
+     }
 
     // Send servo angles to backend over serial when EXECUTE POSITION is pressed
     async executePosition() {
         if (!this.connected || !this.port) return;
+        
+        // Prevent rapid repeat
+        if (this._sending) return;
+        this._sending = true;
+        if (this.sendBtn) this.sendBtn.disabled = true;
         
         try {
             let command = '';
@@ -191,9 +254,11 @@ class KukaController {
             
             const encoder = new TextEncoder();
             const writer = this.port.writable.getWriter();
-            
-            await writer.write(encoder.encode(command));
-            writer.releaseLock();
+            try {
+                await writer.write(encoder.encode(command));
+            } finally {
+                try { writer.releaseLock(); } catch (e) { /* ignore */ }
+            }
             
             this.lastCommand = command.trim();
             this.updateSystemState();
@@ -203,6 +268,12 @@ class KukaController {
         } catch (error) {
             console.error('[ERROR] Command execution failed:', error);
             alert(`Failed to execute command: ${error.message}`);
+        } finally {
+            // small cooldown
+            setTimeout(() => {
+                this._sending = false;
+                if (this.sendBtn && this.connected) this.sendBtn.disabled = false;
+            }, 300);
         }
     }
 }
@@ -228,6 +299,10 @@ window.resetAllServos = function() {
         }
         window.kukaController.updateSystemState();
         console.log('[SYSTEM] All joints reset to home position');
+        // Also send the new home positions to the Pico if connected
+        if (window.kukaController && window.kukaController.connected) {
+            try { window.kukaController.executePosition(); } catch (e) { console.error('Failed to send home positions', e); }
+        }
     }
 }
 

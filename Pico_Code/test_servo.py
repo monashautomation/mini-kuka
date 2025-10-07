@@ -1,8 +1,9 @@
+
 from machine import Pin, PWM
 import time
 
 # Setup
-servo = PWM(Pin(16))   # Use GPIO16 (change if needed)
+servo = PWM(Pin(0))   # Use GPIO16 (change if needed)
 servo.freq(50)         # Standard servo PWM frequency: 50 Hz
 led = Pin("LED", Pin.OUT)
 
